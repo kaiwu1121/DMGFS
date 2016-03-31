@@ -21,6 +21,7 @@ public class FSNamesystem {
     }
 
     protected synchronized void addINode(String fileName) {
+        // INode (file + chunkInfo[] chunk)
         INode inode = new INode(fileName);
         inodes.add(inode);
     }
