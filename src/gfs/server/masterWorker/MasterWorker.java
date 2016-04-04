@@ -1,8 +1,8 @@
-//package gfs.server.masterManager;
+package gfs.server.master;
 
-//import gfs.protocol.Chunk;
-//import gfs.server.protocol.MasterManagerProtocol;
-//import gfs.util.IPaddr;
+import gfs.protocol.Chunk;
+import gfs.server.protocol.MasterProtocol;
+import gfs.util.IPaddr;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
@@ -10,17 +10,26 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MasterManager extends UnicastRemoteObject implements MasterManagerProtocol {
+public class MasterWorker extends UnicastRemoteObject implements MasterProtocol {
 
     String serverIP;
     private FSNamesystem namesystem;
     private Heartbeat hb;
 
-    public MasterManager() throws Exception {
+    public Master() throws Exception {
         //serverIP = "127.0.0.1";
         serverIP = IPaddr.getIP();
         namesystem = new FSNamesystem();
         hb = new Heartbeat();
+    }
+    
+    public Master(String socket) throws Exception {
+        serverIP = IPaddr.getIP();
+        chunks = new ArrayList();
+        chunkHash = new ConcurrentHashMap();
+        master = (MasterProtocol) Naming.lookup("rmi://" + socket + ":9500/masterManager");
+        master.addServer(serverIP);
+        Chkcheck chkcheck = new Chkcheck();
     }
 
     // create new thred for heatbeat
@@ -34,8 +43,8 @@ public class MasterManager extends UnicastRemoteObject implements MasterManagerP
         public void run() {
             try {
                 while (true) {
-                    //heatbeat check every 30 seconds
-                    sleep(1000 * 10);
+                    //heatbeat check every 60 seconds
+                    sleep(1000 * 60);
                     namesystem.scan();
                 }
             } catch (Exception ex) {
@@ -46,28 +55,10 @@ public class MasterManager extends UnicastRemoteObject implements MasterManagerP
 
     @Override
     public void addServer(String ip) throws Exception {
-        namesystem.addMasterWorkers(ip + ":9600");
-        System.out.println("Server(masterworker) " + ip + " join in.");
+        namesystem.addServer(ip + ":9600");
+        System.out.println("Server " + ip + " join in.");
     }
-    
-    @Override
-    public void removeServer(String ip) throws Exception {
-        namesystem.removeMasterWorkers(ip + ":9600");
-        System.out.println("Server(masterworker) " + ip + " remove out.");
-    }
-   /* @Override
-    public String addFile(String fileName, String ClientIP) throws Exception {
-        String targetWorker = namesystem.addFile(fileName, ClientIp);
-        System.out.println("File " + fileName + " added.");
-       // String globeID = ClientIP + ":" + fileName;
-        //String targetWorker = consistentHash.get(globeID);
-       
-        return targetWorker;
-       // namesystem.addINode(fileName);
-        //System.out.println("File " + fileName + " added.");
-    }*/
-    
-/*
+
     @Override
     public void addFile(String fileName) throws Exception {
         namesystem.addINode(fileName);
@@ -104,13 +95,13 @@ public class MasterManager extends UnicastRemoteObject implements MasterManagerP
         System.out.println("client request file: " + fileName);
         return namesystem.getChunks(fileName);
     }
-*/
+
     public static void main(String[] argv) throws Exception {
-       
-        MasterManager mastermanager = new MasterManager();
+        // 多线程，创建线程用于心跳检测，打印inode列表，chunkserver列表
+        Master master = new Master();
         LocateRegistry.createRegistry(9500);
 
-        Naming.rebind("rmi://" + mastermanager.serverIP + ":9500/masterManager", mastermanager);
-        System.out.println("MasterManager IP is " + mastermanager.serverIP);
+        Naming.rebind("rmi://" + master.serverIP + ":9500/master", master);
+        System.out.println("Master IP is " + master.serverIP);
     }
 }

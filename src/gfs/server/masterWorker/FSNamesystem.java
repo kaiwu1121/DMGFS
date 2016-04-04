@@ -1,4 +1,4 @@
-package gfs.server.masterManager;
+package gfs.server.master;
 
 import gfs.protocol.Chunk;
 import gfs.server.protocol.ChunkServerProtocol;
