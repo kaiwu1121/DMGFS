@@ -1,36 +1,60 @@
-package gfs.server.master;
+//package gfs.server.chunkserver;
 
-import gfs.protocol.Chunk;
-import gfs.server.protocol.MasterProtocol;
-import gfs.util.IPaddr;
+//import gfs.protocol.Chunk;
+//import gfs.server.protocol.ChunkServerProtocol;
+//import gfs.server.protocol.MasterProtocol;
+//import gfs.util.IPaddr;
+//import gfs.util.Security;
+import java.io.*;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
-public class MasterWorker extends UnicastRemoteObject implements MasterProtocol {
+public class MasterWorker extends UnicastRemoteObject implements MasterWorkerProtocol {
 
     String serverIP;
+    //List<Long> chunks;
+   // Map<Long, String> chunkHash;
+    MasterManagerProtocol mastermanager;
+    //ChunkServerProtocol server;
+   // String path = "data/chunkserver/";
     private FSNamesystem namesystem;
     private Heartbeat hb;
 
-    public Master() throws Exception {
-        //serverIP = "127.0.0.1";
+    public MasterWorker() throws Exception {
         serverIP = IPaddr.getIP();
+       // chunks = new ArrayList();
+        //chunkHash = new ConcurrentHashMap();
+
+        mastermanager = (MasterManagerProtocol) Naming.lookup("rmi://192.168.1.102:9500/masterManager");
+        mastermanager.addServer(serverIP);
+       // server = null;
+       // Chkcheck chkcheck = new Chkcheck();
         namesystem = new FSNamesystem();
         hb = new Heartbeat();
     }
-    
-    public Master(String socket) throws Exception {
+
+    public MasterWorker(String socket) throws Exception {
         serverIP = IPaddr.getIP();
-        chunks = new ArrayList();
-        chunkHash = new ConcurrentHashMap();
-        master = (MasterProtocol) Naming.lookup("rmi://" + socket + ":9500/masterManager");
-        master.addServer(serverIP);
-        Chkcheck chkcheck = new Chkcheck();
+       // chunks = new ArrayList();
+        //chunkHash = new ConcurrentHashMap();
+        mastermanager = (MasterManagerProtocol) Naming.lookup("rmi://" + socket + ":9500/masterManager");
+        mastermanager.addServer(serverIP);
+      //  Chkcheck chkcheck = new Chkcheck();
+        namesystem = new FSNamesystem();
+        hb = new Heartbeat();
     }
+/*
+    @Override
+    public Map<Long, String> hbCheck() throws Exception {
+        return chunkHash;
+    }*/
 
     // create new thred for heatbeat
     private class Heartbeat extends Thread {
@@ -56,7 +80,7 @@ public class MasterWorker extends UnicastRemoteObject implements MasterProtocol 
     @Override
     public void addServer(String ip) throws Exception {
         namesystem.addServer(ip + ":9600");
-        System.out.println("Server " + ip + " join in.");
+        System.out.println("Server(chunk server) " + ip + " join in.");
     }
 
     @Override
@@ -97,11 +121,20 @@ public class MasterWorker extends UnicastRemoteObject implements MasterProtocol 
     }
 
     public static void main(String[] argv) throws Exception {
-        // 多线程，创建线程用于心跳检测，打印inode列表，chunkserver列表
-        Master master = new Master();
-        LocateRegistry.createRegistry(9500);
+        MasterWorker masterworker;
 
-        Naming.rebind("rmi://" + master.serverIP + ":9500/master", master);
-        System.out.println("Master IP is " + master.serverIP);
+        System.out.print("Please input masterManager ip: ");
+        BufferedReader ipBuffer = new BufferedReader(new InputStreamReader(System.in));
+        String masterManagerIP = ipBuffer.readLine();
+
+        if (masterManagerIP.trim().length() != 0) {
+            masterworker = new MasterWorker(masterManagerIP);
+        } else {
+            masterworker = new MasterWorker();
+        }
+
+        LocateRegistry.createRegistry(9600);
+        Naming.rebind("rmi://" + masterworker.serverIP + ":9600/masterworker", masterworker);
     }
 }
+
