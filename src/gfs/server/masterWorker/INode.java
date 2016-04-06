@@ -1,10 +1,10 @@
-package gfs.server.master;
+//package gfs.server.master;
 
 
 public class INode {
 
     protected String name;
-    // 该文件对应的INode列表，每一个ChunkInfo里面对应一个chunk的不同备份
+    
     protected ChunkInfo[] chunks;
 
     public INode() {
@@ -22,7 +22,7 @@ public class INode {
         this.chunks = chunks;
     }
 
-    // 获取该文件对应的chunk列表
+  
     ChunkInfo[] getChunks() {
         return this.chunks;
     }

@@ -1,10 +1,10 @@
-package gfs.server.chunkserver;
+//package gfs.server.chunkserver;
 
-import gfs.protocol.Chunk;
-import gfs.server.protocol.ChunkServerProtocol;
-import gfs.server.protocol.MasterProtocol;
-import gfs.util.IPaddr;
-import gfs.util.Security;
+//import gfs.protocol.Chunk;
+//import gfs.server.protocol.ChunkServerProtocol;
+//import gfs.server.protocol.MasterProtocol;
+//import gfs.util.IPaddr;
+//import gfs.util.Security;
 import java.io.*;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
@@ -21,7 +21,8 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
     String serverIP;
     List<Long> chunks;
     Map<Long, String> chunkHash;
-    MasterProtocol master;
+    MasterManagerProtocol MasterManager;
+    MasterWorkerProtocol MasterWorker;
     ChunkServerProtocol server;
     String path = "data/chunkserver/";
 
@@ -29,9 +30,12 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
         serverIP = IPaddr.getIP();
         chunks = new ArrayList();
         chunkHash = new ConcurrentHashMap();
-
-        master = (MasterProtocol) Naming.lookup("rmi://192.168.130.128:9500/master");
-        master.addServer(serverIP);
+        
+        MasterManager = (MasterManagerProtocol) Naming.lookup("rmi://192.168.130.128:9500/masterManager");
+        String targetMasterWorker = MasterManager.gettargetServer(serverIP);
+        MasterWorker = (MasterWorkerProtocol) Naming.lookup("rmi://" + targetMasterWorker + ":9500/masterworker");
+       // master = (MasterProtocol) Naming.lookup("rmi://192.168.130.128:9500/masterworker");
+        MasterWorker.addServer(serverIP);
         server = null;
         Chkcheck chkcheck = new Chkcheck();
     }
@@ -40,12 +44,17 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
         serverIP = IPaddr.getIP();
         chunks = new ArrayList();
         chunkHash = new ConcurrentHashMap();
-        master = (MasterProtocol) Naming.lookup("rmi://" + socket + ":9500/master");
-        master.addServer(serverIP);
+        
+        MasterManager = (MasterManagerProtocol) Naming.lookup("rmi://" + socket + ":9500/masterManager");
+        String targetMasterWorker = MasterManager.gettargetServer(serverIP);
+        MasterWorker = (MasterWorkerProtocol) Naming.lookup("rmi://" + targetMasterWorker + ":9500/masterworker");
+
+       // master = (MasterProtocol) Naming.lookup("rmi://" + socket + ":9500/masterworker");
+        MasterWorker.addServer(serverIP);
         Chkcheck chkcheck = new Chkcheck();
     }
 
-    // 检测chunk文件hash
+    // check chunk file hash
     private class Chkcheck extends Thread {
 
         Chkcheck() {
@@ -80,7 +89,7 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
         return "chk_" + Long.toString(id);
     }
 
-    // 将chunk对应字节流保存为文件
+    // save bit data of chunk as file 
     public synchronized String saveFile(Chunk chk, byte[] data) throws Exception {
         String fileName = chk.getChunkName();
         File file = new File(path + fileName);
@@ -98,7 +107,7 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
         file.delete();
     }
 
-    // 获取chunk对应字节流
+    // get bit data of chunk
     public byte[] readFile(Chunk chk) throws IOException {
         String fileName = chk.getChunkName();
         int length = (int) chk.getNumBytes();
@@ -123,12 +132,12 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
             System.out.println("chunk " + chunk.getChunkName() + "fail, recovering...");
         }
 
-        // 存储chunk
+        // store chunk
         String hash = saveFile(chunk, stream);
         chunks.add(chunk.getChunkId());
         chunkHash.put(chunk.getChunkId(), hash);
         System.out.println("chunk " + chunk.getChunkName() + " added.");
-        // 数据推送
+        // data send
         if (socket != null) {
             server = (ChunkServerProtocol) Naming.lookup("rmi://" + socket + "/chunkserver");
             int i = 0;
@@ -141,12 +150,12 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
 
     @Override
     public int updateChunk(Chunk chunk, byte[] stream, String socket) throws Exception {
-        // 存储chunk
+        // stroe chunk
         String hash = saveFile(chunk, stream);
         //chunks.add(chunk.getChunkId());
         chunkHash.put(chunk.getChunkId(), hash);
         System.out.println("chunk " + chunk.getChunkName() + " updated.");
-        // 数据推送
+        // data send
         if (socket != null) {
             server = (ChunkServerProtocol) Naming.lookup("rmi://" + socket + "/chunkserver");
             int i = 0;
@@ -181,7 +190,7 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
 
     @Override
     public void backupChunk(Chunk chunk, String socket) throws Exception {
-        // 存储chunk
+        //store chunk
         ChunkServerProtocol backupServer = (ChunkServerProtocol) Naming.lookup(
                 "rmi://" + socket + "/chunkserver");
 
@@ -196,7 +205,7 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
     public static void main(String[] argv) throws Exception {
         ChunkServer server;
 
-        System.out.print("输入master ip: ");
+        System.out.print("Please input masterManager Server ip: ");
         BufferedReader ipBuffer = new BufferedReader(new InputStreamReader(System.in));
         String masterIP = ipBuffer.readLine();
 

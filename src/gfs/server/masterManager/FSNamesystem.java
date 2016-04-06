@@ -27,6 +27,7 @@ public class FSNamesystem {
     protected synchronized void addMasterWorkers(String socket) {
         // INode (file + chunkInfo[] chunk)
         newWorker.add(socket);
+        System.out.println(newWorker.getSize());
         masterworkers.add(socket);
     }
  
@@ -35,10 +36,18 @@ public class FSNamesystem {
         masterworkers.remove(socket);
     }
 
-
+    protected synchronized String getTargetMasterWorker(String socket) {
+        // INode (file + chunkInfo[] chunk)
+        String targetMasterWorker = newWorker.get(socket);
+        System.out.println(targetMasterWorker);
+        //masterworkers.add(socket);
+        return targetMasterWorker;
+    }
+   
     // heatbeat
      protected void scan() throws Exception {
          System.out.println("begin checking...");
+         System.out.println(newWorker.getSize());
      }
     
 

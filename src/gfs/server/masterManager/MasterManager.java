@@ -55,6 +55,13 @@ public class MasterManager extends UnicastRemoteObject implements MasterManagerP
         namesystem.removeMasterWorkers(ip + ":9600");
         System.out.println("Server(masterworker) " + ip + " remove out.");
     }
+    
+    @Override
+    public String gettargetServer(String ip) throws Exception {
+        String targetServer = namesystem.getTargetMasterWorker(ip + ":9600");
+        System.out.println("Send " + ip + " to " + targetServer);
+        return targetServer;
+    }
    /* @Override
     public String addFile(String fileName, String ClientIP) throws Exception {
         String targetWorker = namesystem.addFile(fileName, ClientIp);

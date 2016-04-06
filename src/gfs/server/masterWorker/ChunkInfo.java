@@ -1,13 +1,11 @@
-package gfs.server.master;
+//package gfs.server.master;
 
-import gfs.protocol.Chunk;
+//import gfs.protocol.Chunk;
 
-/**
- * 记录一个chunk所对应的全部备份位置
- */
+
 public class ChunkInfo extends Chunk {
 
-    int seq; // 该值在检测时用于修改inode中chunks用到，记录该chunk在文件中的序号
+    int seq; 
     String hash;
     private String[] doubles;
     Chunk chunk;
@@ -25,7 +23,7 @@ public class ChunkInfo extends Chunk {
         this.inode = inode;
     }
 
-    // 设置一个chunk所对应的chunkserver
+    
     public void setChunkServer(String[] triplet) {
         this.doubles = triplet;
     }

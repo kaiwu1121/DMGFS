@@ -68,7 +68,7 @@ public class MasterWorker extends UnicastRemoteObject implements MasterWorkerPro
             try {
                 while (true) {
                     //heatbeat check every 60 seconds
-                    sleep(1000 * 60);
+                    sleep(1000 * 10);
                     namesystem.scan();
                 }
             } catch (Exception ex) {
