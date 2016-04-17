@@ -18,7 +18,7 @@ public class FSNamesystem {
     public FSNamesystem() {
         masterworkers = new HashSet<String>();
         //hash fucntion + # of virtual node + mapping relationship of virtual nodes hash value to masterworker 
-        newWorker = new ConsistentHash<String>(new HashFunction(), 2, masterworkers);
+        newWorker = new ConsistentHash<String>(new HashFunction(), 120, masterworkers);
         //inodes = new ArrayList();
         //servers = new ArrayList();
         //serverInfo = new LinkedHashMap();
@@ -39,7 +39,7 @@ public class FSNamesystem {
     protected synchronized String getTargetMasterWorker(String socket) {
         // INode (file + chunkInfo[] chunk)
         String targetMasterWorker = newWorker.get(socket);
-        System.out.println(targetMasterWorker);
+       // System.out.println(targetMasterWorker);
         //masterworkers.add(socket);
         return targetMasterWorker;
     }

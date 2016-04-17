@@ -29,7 +29,7 @@ public interface MasterManagerProtocol extends Remote {
   //  public Map<Chunk, String[]> getChunks(String fileName) throws Exception;
 
     // chunkserver Resiger to master
-    public void addServer(String ip) throws Exception;
+    public String addServer(String ip) throws Exception;
     public void removeServer(String ip) throws Exception;
     public String gettargetServer(String ip) throws Exception;
     // chunkserver sleep

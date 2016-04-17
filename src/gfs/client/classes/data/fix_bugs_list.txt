@@ -1,0 +1,17 @@
+Fix bugs list:
+1. Display Poems in highslide like the Images.
+2. Gold Coast -- subjects.php -- fix Date Range bug.
+3. Fix bug related to Date Range on image.php of kumasi
+4. Kumasi -- browse.php -- display Object.Thumbnail
+5. Kumasi -- object.php -- display Object.Format
+6. Gold Coast -- object.php -- display Object.Format
+7. Kumasi -- segment.php -- fix Date Range bug
+8.  Banjul -- fix/add highslide on essays.php   Documents (Court Cases) are not even being displayed on this page and they should be.
+9.  Banjul Court -- object.php: do not display fields
+10. Banjul Court -- object.php: do not link to segment.php for Resource Type=text
+11. Buh Kunta -- fix/add highslide on essays.php 
+12. Buh Kunta -- object.php -- find better player
+13. Kumasi --- Fix Language filter on interviews.php, see for example these sub-pages.
+ 
+
+ 

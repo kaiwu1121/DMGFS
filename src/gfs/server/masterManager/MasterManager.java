@@ -45,9 +45,10 @@ public class MasterManager extends UnicastRemoteObject implements MasterManagerP
     }
 
     @Override
-    public void addServer(String ip) throws Exception {
+    public String addServer(String ip) throws Exception {
         namesystem.addMasterWorkers(ip + ":9600");
         System.out.println("Server(masterworker) " + ip + " join in.");
+        return serverIP;
     }
     
     @Override
@@ -58,7 +59,7 @@ public class MasterManager extends UnicastRemoteObject implements MasterManagerP
     
     @Override
     public String gettargetServer(String ip) throws Exception {
-        String targetServer = namesystem.getTargetMasterWorker(ip + ":9600");
+        String targetServer = namesystem.getTargetMasterWorker(ip);
         System.out.println("Send " + ip + " to " + targetServer);
         return targetServer;
     }

@@ -18,7 +18,7 @@ public class Client {
         if (masterIP.trim().length() != 0) {
             dfs = new DFS(masterIP + ":9500");
         } else {
-            dfs = new DFS("192.168.130.128:9500");
+            dfs = new DFS("192.168.1.111:9500");
         }
 
         System.out.println("Please choose test task：");

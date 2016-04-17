@@ -32,8 +32,11 @@ public class MasterWorker extends UnicastRemoteObject implements MasterWorkerPro
        // chunks = new ArrayList();
         //chunkHash = new ConcurrentHashMap();
 
-        mastermanager = (MasterManagerProtocol) Naming.lookup("rmi://192.168.1.102:9500/masterManager");
-        mastermanager.addServer(serverIP);
+        mastermanager = (MasterManagerProtocol) Naming.lookup("rmi://192.168.51.1:9500/masterManager");
+        String joinedMaster = mastermanager.addServer(serverIP);
+        if(joinedMaster != null && !joinedMaster.isEmpty()) {
+            System.out.println("This machine join " + joinedMaster + " !");
+        } 
        // server = null;
        // Chkcheck chkcheck = new Chkcheck();
         namesystem = new FSNamesystem();
@@ -45,7 +48,10 @@ public class MasterWorker extends UnicastRemoteObject implements MasterWorkerPro
        // chunks = new ArrayList();
         //chunkHash = new ConcurrentHashMap();
         mastermanager = (MasterManagerProtocol) Naming.lookup("rmi://" + socket + ":9500/masterManager");
-        mastermanager.addServer(serverIP);
+        String joinedMaster = mastermanager.addServer(serverIP);
+        if(joinedMaster != null && !joinedMaster.isEmpty()) {
+            System.out.println("This machine join " + joinedMaster + " !");
+        } 
       //  Chkcheck chkcheck = new Chkcheck();
         namesystem = new FSNamesystem();
         hb = new Heartbeat();
@@ -134,7 +140,7 @@ public class MasterWorker extends UnicastRemoteObject implements MasterWorkerPro
         }
 
         LocateRegistry.createRegistry(9600);
-        Naming.rebind("rmi://" + masterworker.serverIP + ":9600/masterworker", masterworker);
+        Naming.rebind("rmi://" + masterworker.serverIP + ":9600/masterWorker", masterworker);
     }
 }
 

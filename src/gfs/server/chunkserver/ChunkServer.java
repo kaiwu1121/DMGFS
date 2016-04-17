@@ -31,9 +31,10 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
         chunks = new ArrayList();
         chunkHash = new ConcurrentHashMap();
         
-        MasterManager = (MasterManagerProtocol) Naming.lookup("rmi://192.168.130.128:9500/masterManager");
+        MasterManager = (MasterManagerProtocol) Naming.lookup("rmi://192.168.56.1:9500/masterManager");
         String targetMasterWorker = MasterManager.gettargetServer(serverIP);
-        MasterWorker = (MasterWorkerProtocol) Naming.lookup("rmi://" + targetMasterWorker + ":9500/masterworker");
+         System.out.println(targetMasterWorker);
+        MasterWorker = (MasterWorkerProtocol) Naming.lookup("rmi://" + targetMasterWorker + "/masterWorker");
        // master = (MasterProtocol) Naming.lookup("rmi://192.168.130.128:9500/masterworker");
         MasterWorker.addServer(serverIP);
         server = null;
@@ -47,7 +48,8 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
         
         MasterManager = (MasterManagerProtocol) Naming.lookup("rmi://" + socket + ":9500/masterManager");
         String targetMasterWorker = MasterManager.gettargetServer(serverIP);
-        MasterWorker = (MasterWorkerProtocol) Naming.lookup("rmi://" + targetMasterWorker + ":9500/masterworker");
+         System.out.println(targetMasterWorker);
+        MasterWorker = (MasterWorkerProtocol) Naming.lookup("rmi://" + targetMasterWorker + "/masterWorker");
 
        // master = (MasterProtocol) Naming.lookup("rmi://" + socket + ":9500/masterworker");
         MasterWorker.addServer(serverIP);
@@ -139,7 +141,7 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
         System.out.println("chunk " + chunk.getChunkName() + " added.");
         // data send
         if (socket != null) {
-            server = (ChunkServerProtocol) Naming.lookup("rmi://" + socket + "/chunkserver");
+            server = (ChunkServerProtocol) Naming.lookup("rmi://" + socket + "/chunkServer");
             int i = 0;
             do {
                 i = server.saveChunk(chunk, stream, null);
@@ -157,7 +159,7 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
         System.out.println("chunk " + chunk.getChunkName() + " updated.");
         // data send
         if (socket != null) {
-            server = (ChunkServerProtocol) Naming.lookup("rmi://" + socket + "/chunkserver");
+            server = (ChunkServerProtocol) Naming.lookup("rmi://" + socket + "/chunkServer");
             int i = 0;
             do {
                 i = server.updateChunk(chunk, stream, null);
@@ -192,7 +194,7 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
     public void backupChunk(Chunk chunk, String socket) throws Exception {
         //store chunk
         ChunkServerProtocol backupServer = (ChunkServerProtocol) Naming.lookup(
-                "rmi://" + socket + "/chunkserver");
+                "rmi://" + socket + "/chunkServer");
 
         backupServer.saveChunk(chunk, readFile(chunk), null);
     }
@@ -215,7 +217,7 @@ public class ChunkServer extends UnicastRemoteObject implements ChunkServerProto
             server = new ChunkServer();
         }
 
-        LocateRegistry.createRegistry(9600);
-        Naming.rebind("rmi://" + server.serverIP + ":9600/chunkserver", server);
+        LocateRegistry.createRegistry(9700);
+        Naming.rebind("rmi://" + server.serverIP + ":9700/chunkServer", server);
     }
 }

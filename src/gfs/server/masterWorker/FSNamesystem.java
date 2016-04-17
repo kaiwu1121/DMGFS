@@ -109,7 +109,7 @@ public class FSNamesystem {
 
                 String socket = chunkInfo.getFirst();
                 ChunkServerProtocol server = (ChunkServerProtocol) Naming.lookup(
-                        "rmi://" + socket + "/chunkserver");
+                        "rmi://" + socket + "/chunkServer");
                 String hash = server.getUpdate(chunkInfo.chunk);
                 chunkInfo.hash = hash;
                 inodes.get(i).chunks[j] = chunkInfo;
@@ -202,7 +202,7 @@ public class FSNamesystem {
                         }
 
                         ChunkServerProtocol server = (ChunkServerProtocol) Naming.lookup(
-                                "rmi://" + socket + "/chunkserver");
+                                "rmi://" + socket + "/chunkServer");
                         server.deleteChunk(inode.chunks[j].chunk);
                         List<ChunkInfo> chunks = serverInfo.get(socket);
                         chunks.remove(inode.chunks[j]);
@@ -226,18 +226,18 @@ public class FSNamesystem {
 
         ChunkServerProtocol server;
         // get crashed chunkserver and chunk
-        for (int i = 0; i < servers.size(); i++) {
+ /*           for (int i = 0; i < servers.size(); i++) {
             List<ChunkInfo> chunks = serverInfo.get(servers.get(i));
             Iterator iter = chunks.iterator();
             try {
                 server = (ChunkServerProtocol) Naming.lookup(
-                        "rmi://" + servers.get(i) + "/chunkserver");
+                        "rmi://" + servers.get(i) + "/chunkServer");
                 chkHash = server.hbCheck();
                
                 List<ChunkInfo> failure = new LinkedList();
 
                 int num = 0;
-                while (iter.hasNext()) {
+            while (iter.hasNext()) {
                     ChunkInfo chunkInfo = (ChunkInfo) iter.next();
                     String hash = chkHash.get(chunkInfo.getChunkId());
 
@@ -273,7 +273,7 @@ public class FSNamesystem {
 
        
         Iterator iter = failServer.iterator();
-        while (iter.hasNext()) {
+        while (iter.hasNext()) { 
             String socket = (String) iter.next();
             System.out.println("backup fault server " + socket + " ...");
 
@@ -314,7 +314,7 @@ public class FSNamesystem {
                         "rmi://" + chunkInfo.getFirst() + "/chunkserver");
                 server.backupChunk(chunkInfo.chunk, socket);
             }
-        }
+        }*/
         System.out.println("check end, next check will after 20m");
     }
 }
